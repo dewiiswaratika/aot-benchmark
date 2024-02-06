@@ -15,9 +15,8 @@ def main_worker(gpu, cfg, enable_amp=True):
     # Initiate a training manager
     trainer = Trainer(rank=gpu, cfg=cfg, enable_amp=enable_amp)
     # Start Training
-    trainer.sequential_training()
-
-
+    trainer.sequential_training()    
+    
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Train VOS")
@@ -27,7 +26,7 @@ def main():
     parser.add_argument('--max_id_num', type=int, default='-1')
 
     parser.add_argument('--start_gpu', type=int, default=0)
-    parser.add_argument('--gpu_num', type=int, default=-1)
+    parser.add_argument('--gpu_num', type=int, default=1)  # Set to 1 for single GPU
     parser.add_argument('--batch_size', type=int, default=-1)
     parser.add_argument('--dist_url', type=str, default='')
     parser.add_argument('--amp', action='store_true')
@@ -50,8 +49,9 @@ def main():
         cfg.DATASETS = args.datasets
 
     cfg.DIST_START_GPU = args.start_gpu
-    if args.gpu_num > 0:
-        cfg.TRAIN_GPUS = args.gpu_num
+#    cfg.TRAIN_GPUS = args.gpu_num  # Set to 1 for single GPU
+    cfg.TRAIN_GPUS = 1
+    
     if args.batch_size > 0:
         cfg.TRAIN_BATCH_SIZE = args.batch_size
 
@@ -75,13 +75,12 @@ def main():
             random.randint(0, 9))
     else:
         cfg.DIST_URL = args.dist_url
-        
-    if cfg.TRAIN_GPUS > 1:
-        # Use torch.multiprocessing.spawn to launch distributed processes
-        mp.spawn(main_worker, nprocs=cfg.TRAIN_GPUS, args=(cfg, args.amp))
-    else:
-        cfg.TRAIN_GPUS = 1
-        main_worker(0, cfg, args.amp)
+
+    # Ensure TRAIN_GPUS is set to 1 for single GPU training
+    cfg.TRAIN_GPUS = 1
+
+    # Run training on the main_worker function with a single GPU
+    main_worker(0, cfg, args.amp)
 
 if __name__ == '__main__':
     main()

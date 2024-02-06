@@ -1,5 +1,6 @@
 exp="default"
-gpu_num="4"
+#ganti jumlah gpu
+gpu_num="1"
 
 model="aott"
 # model="aots"

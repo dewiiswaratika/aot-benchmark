@@ -238,6 +238,8 @@ def demo(cfg):
 
         print('Save a visualization video to {}.'.format(output_video_path))
         videoWriter.release()
+    
+
 
 
 def main():
